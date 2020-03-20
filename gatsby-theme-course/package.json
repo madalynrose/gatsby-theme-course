@@ -1,0 +1,30 @@
+{
+	"name": "gatsby-theme-course",
+	"version": "1.0.0",
+	"main": "gatsby-config.js",
+	"author": "madalynrose <hello@madalyn.dev> (@madalynrose)",
+	"license": "MIT",
+	"peerDependencies": {
+		"gatsby": "^2.19.42",
+		"react": "^16.13.0",
+		"react-dom": "^16.13.0"
+	},
+	"devDependencies": {
+		"gatsby": "^2.19.42",
+		"react": "^16.13.0",
+		"react-dom": "^16.13.0"
+	},
+	"dependencies": {
+		"@mdx-js/mdx": "^1.5.7",
+		"@mdx-js/react": "^1.5.7",
+		"gatsby-plugin-mdx": "^1.0.82",
+		"gatsby-plugin-react-helmet": "^3.1.23",
+		"gatsby-source-filesystem": "^2.1.54",
+		"react-helmet": "^5.2.1"
+	},
+	"scripts": {
+		"build": "gatsby build",
+		"clean": "gatsby clean",
+		"develop": "gatsby develop"
+	}
+}
