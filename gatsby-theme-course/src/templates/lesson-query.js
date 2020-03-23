@@ -4,23 +4,18 @@ import LessonPage from '../components/lesson';
 export default LessonPage;
 
 export const query = graphql`
-	query LessonPageQuery($id: String!, $previousId: String, $nextId: String) {
-		site {
-			siteMetadata {
-				title
-			}
-		}
-		mdxCourse {
-			title
-			description
-		}
-		mdxLesson(id: { eq: $id }) {
+	query LessonPageQuery($id: String!, $previousId: String, $nextId: String, $module: Int!) {
+		lesson: mdxLesson(id: { eq: $id }) {
 			id
 			slug
 			title
 			module
-			lesson
+			number: lesson
 			body
+		}
+		module: mdxModule(module: { eq: $module }) {
+			title
+			description
 		}
 		previous: mdxLesson(id: { eq: $previousId }) {
 			id

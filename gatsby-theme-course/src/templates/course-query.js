@@ -10,19 +10,18 @@ export const query = graphql`
 				title
 			}
 		}
-		mdxCourse {
+		course: mdxCourse {
 			title
 			body
 			description
 		}
-		allMdxModule(sort: { fields: module, order: ASC }) {
-			edges {
-				node {
-					id
-					module
-					slug
-					title
-				}
+		modules: allMdxModule(sort: { fields: module, order: ASC }) {
+			nodes {
+				id
+				number: module
+				slug
+				title
+				description
 			}
 		}
 	}

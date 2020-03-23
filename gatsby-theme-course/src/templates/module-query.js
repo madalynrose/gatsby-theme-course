@@ -5,16 +5,7 @@ export default ModulePage;
 
 export const query = graphql`
 	query ModulePageQuery($id: String!, $previousId: String, $nextId: String, $module: Int!) {
-		site {
-			siteMetadata {
-				title
-			}
-		}
-		mdxCourse {
-			title
-			description
-		}
-		mdxModule(id: { eq: $id }) {
+		module: mdxModule(id: { eq: $id }) {
 			id
 			slug
 			title
@@ -34,12 +25,11 @@ export const query = graphql`
 			module
 		}
 		lessons: allMdxLesson(filter: { module: { eq: $module } }, sort: { fields: lesson }) {
-			edges {
-				node {
-					title
-					slug
-					lesson
-				}
+			nodes {
+				title
+				slug
+				number: lesson
+				description
 			}
 		}
 	}

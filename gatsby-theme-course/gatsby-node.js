@@ -188,6 +188,7 @@ exports.onCreateNode = async ({ node, actions, getNode, createNodeId }, themeOpt
 			const fieldData = {
 				title: node.frontmatter.title,
 				module: node.frontmatter.module,
+				description: node.frontmatter.description,
 				slug: slug,
 			};
 			await createNode({
@@ -233,6 +234,7 @@ exports.onCreateNode = async ({ node, actions, getNode, createNodeId }, themeOpt
 			slug,
 			lesson: node.frontmatter.lesson,
 			module: node.frontmatter.module,
+			description: node.frontmatter.description,
 		};
 
 		const mdxLessonId = createNodeId(`${node.id} >>> MdxLesson`);
@@ -270,6 +272,7 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 						id
 						slug
 						module
+						description
 						parent {
 							... on Mdx {
 								fileAbsolutePath
@@ -285,6 +288,7 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 						slug
 						module
 						lesson
+						description
 					}
 				}
 			}
@@ -304,7 +308,7 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 	modules.forEach(({ node }, index) => {
 		const next = index === modules.length - 1 ? null : modules[index + 1];
 		const previous = index === 0 ? null : modules[index - 1];
-		const { fileAbsolutePath } = node.parent;
+
 		createPage({
 			path: node.slug,
 			component: ModuleTemplate,
@@ -312,7 +316,6 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				id: node.id,
 				slug: node.slug,
 				module: node.module,
-				absolutePathRegex: `/^${path.dirname(fileAbsolutePath)}/`,
 				previousId: previous ? previous.node.id : undefined,
 				nextId: next ? next.node.id : undefined,
 			},
@@ -330,6 +333,8 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 			context: {
 				id: node.id,
 				slug: slug,
+				module: node.module,
+				lesson: node.lesson,
 				previousId: previous ? previous.node.id : undefined,
 				nextId: next ? next.node.id : undefined,
 			},
