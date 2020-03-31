@@ -3,7 +3,7 @@ const path = require(`path`);
 const mkdirp = require(`mkdirp`);
 const withDefaults = require('./utils/default-options');
 const { createFilePath } = require(`gatsby-source-filesystem`);
-const { urlResolve, createContentDigest } = require(`gatsby-core-utils`);
+const { urlResolve, createContentDigest, graphql } = require(`gatsby-core-utils`);
 // Make sure the data directory exists
 exports.onPreBootstrap = ({ store }, themeOptions) => {
 	const { program } = store.getState();
@@ -267,29 +267,25 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 	const result = await graphql(`
 		{
 			allMdxModule(sort: { fields: module, order: ASC }) {
-				edges {
-					node {
-						id
-						slug
-						module
-						description
-						parent {
-							... on Mdx {
-								fileAbsolutePath
-							}
+				nodes {
+					id
+					slug
+					module
+					description
+					parent {
+						... on Mdx {
+							fileAbsolutePath
 						}
 					}
 				}
 			}
 			allMdxLesson(sort: { fields: [module, lesson], order: ASC }) {
-				edges {
-					node {
-						id
-						slug
-						module
-						lesson
-						description
-					}
+				nodes {
+					id
+					slug
+					module
+					lesson
+					description
 				}
 			}
 		}
@@ -301,14 +297,65 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 
 	// Create Posts and Post pages.
 	const { allMdxModule, allMdxLesson } = result.data;
-	const modules = allMdxModule.edges;
-	const lessons = allMdxLesson.edges;
+	const modules = allMdxModule.nodes;
+	const lessons = allMdxLesson.nodes;
+
+	const getPrevNext = (module, lesson, index) => {
+		reporter.info(`module: ${module}, lesson: ${lesson}, index: ${index}`);
+		let previous, next;
+		//if current node is module landing page
+		if (!lesson) {
+			if (module !== 1) {
+				//previous is last lesson of previous module
+				previous = lessons.find(node => node.module === module - 1);
+				if (!previous) {
+					//we need the previous module
+					next = modules[index - 1];
+				}
+			}
+			//next is the first lesson in module
+			next = lessons.find(node => node.module === module);
+			if (!next) {
+				//we need the next module
+				next = modules[index + 1];
+			}
+		} else {
+			//if lesson is first lesson in module
+			if (lesson === 1) {
+				//previous is module landing page
+				previous = modules.find(node => node.module === module);
+			} else {
+				//previous is previous lesson
+				previous = lessons[index - 1];
+			}
+			//if lesson is last lesson in module
+			if (lessons[index + 1] && lessons[index + 1].lesson === 1) {
+				//next is module landing page for next module
+				next = modules.find(node => node.module === module + 1);
+			} else {
+				//next is next lesson
+				next = lessons[index + 1];
+			}
+		}
+		if (previous) {
+			previous.pageType = previous.lesson ? 'lesson' : 'module';
+		}
+		if (next) {
+			next.pageType = next.lesson ? 'lesson' : 'module';
+		}
+		return {
+			previous,
+			next,
+		};
+	};
 
 	// Create a page for each Module
-	modules.forEach(({ node }, index) => {
-		const next = index === modules.length - 1 ? null : modules[index + 1];
-		const previous = index === 0 ? null : modules[index - 1];
-
+	modules.forEach((node, index) => {
+		//const next = index === modules.length - 1 ? null : modules[index + 1];
+		//	const previous = index === 0 ? null : modules[index - 1];
+		const { previous, next } = getPrevNext(node.module, false, index);
+		reporter.info(previous && previous.slug);
+		reporter.info(next && next.slug);
 		createPage({
 			path: node.slug,
 			component: ModuleTemplate,
@@ -316,16 +363,20 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				id: node.id,
 				slug: node.slug,
 				module: node.module,
-				previousId: previous ? previous.node.id : undefined,
-				nextId: next ? next.node.id : undefined,
+				previousId: previous ? previous.id : undefined,
+				previousType: previous ? previous.pageType : undefined,
+				nextId: next ? next.id : undefined,
+				nextType: next ? next.pageType : undefined,
 			},
 		});
 	});
 
-	lessons.forEach(({ node }, index) => {
-		const next = index === lessons.length - 1 ? null : lessons[index + 1];
-		const previous = index === 0 ? null : lessons[index - 1];
-
+	lessons.forEach((node, index) => {
+		//	const next = index === lessons.length - 1 ? null : lessons[index + 1];
+		//	const previous = index === 0 ? null : lessons[index - 1];
+		const { previous, next } = getPrevNext(node.module, node.lesson, index);
+		reporter.info(previous && previous.slug);
+		reporter.info(next && next.slug);
 		const { slug } = node;
 		createPage({
 			path: slug,
@@ -335,8 +386,10 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				slug: slug,
 				module: node.module,
 				lesson: node.lesson,
-				previousId: previous ? previous.node.id : undefined,
-				nextId: next ? next.node.id : undefined,
+				previousId: previous ? previous.id : undefined,
+				previousType: previous ? previous.pageType : undefined,
+				nextId: next ? next.id : undefined,
+				nextType: next ? next.pageType : undefined,
 			},
 		});
 	});

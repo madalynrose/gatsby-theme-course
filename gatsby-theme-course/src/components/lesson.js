@@ -3,15 +3,11 @@ import { MDXRenderer } from 'gatsby-plugin-mdx';
 import Layout from './layout';
 import PrevNext from './prev-next';
 
-const Lesson = ({ data: { lesson, previous, next, module } }) => (
+const Lesson = ({ data: { lesson, previous, next } }) => (
 	<Layout currentModule={lesson.module}>
 		<h1>
 			{lesson.number}: {lesson.title}
 		</h1>
-		<div>
-			{module.title}
-			{module.description}
-		</div>
 		<MDXRenderer>{lesson.body}</MDXRenderer>
 		<PrevNext previous={previous} next={next} />
 	</Layout>

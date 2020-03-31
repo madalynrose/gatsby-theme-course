@@ -4,7 +4,12 @@ import ListItem from './list-item';
 
 const List = ({ items }) => {
 	return (
-		<ul>
+		<ul
+			sx={{
+				listStyle: `none`,
+				pl: 0,
+			}}
+		>
 			{items.map(item => (
 				<ListItem
 					key={item.title}

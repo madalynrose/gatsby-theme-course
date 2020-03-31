@@ -1,4 +1,5 @@
 import React from 'react';
+import { Heading } from 'theme-ui';
 import { MDXRenderer } from 'gatsby-plugin-mdx';
 import Layout from './layout';
 import List from './list';
@@ -6,9 +7,9 @@ import List from './list';
 const Course = ({ data: { course, modules } }) => {
 	return (
 		<Layout>
-			<h1>{course.title}</h1>
+			<Heading as="h1">{course.title}</Heading>
 			<MDXRenderer>{course.body}</MDXRenderer>
-			<h2>List of modules:</h2>
+			<Heading>List of modules:</Heading>
 			<List items={modules.nodes} />
 		</Layout>
 	);
