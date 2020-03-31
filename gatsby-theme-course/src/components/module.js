@@ -4,7 +4,7 @@ import Layout from './layout';
 import List from './list';
 import PrevNext from './prev-next';
 
-const Module = ({ data: { module, previous, next, lessons } }) => (
+const Module = ({ data: { module, lessons }, pageContext: { previous, next } }) => (
 	<Layout currentModule={module.module}>
 		<h1>{module.title}</h1>
 		<MDXRenderer>{module.body}</MDXRenderer>

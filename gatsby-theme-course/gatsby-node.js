@@ -271,6 +271,7 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 					id
 					slug
 					module
+					title
 					description
 					parent {
 						... on Mdx {
@@ -284,6 +285,7 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 					id
 					slug
 					module
+					title
 					lesson
 					description
 				}
@@ -307,10 +309,11 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 		if (!lesson) {
 			if (module !== 1) {
 				//previous is last lesson of previous module
-				previous = lessons.find(node => node.module === module - 1);
+				let previousModuleLessons = lessons.filter(node => node.module === module - 1);
+				previous = previousModuleLessons[previousModuleLessons.length - 1];
 				if (!previous) {
 					//we need the previous module
-					next = modules[index - 1];
+					previous = modules[index - 1];
 				}
 			}
 			//next is the first lesson in module
@@ -337,12 +340,6 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				next = lessons[index + 1];
 			}
 		}
-		if (previous) {
-			previous.pageType = previous.lesson ? 'lesson' : 'module';
-		}
-		if (next) {
-			next.pageType = next.lesson ? 'lesson' : 'module';
-		}
 		return {
 			previous,
 			next,
@@ -354,8 +351,6 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 		//const next = index === modules.length - 1 ? null : modules[index + 1];
 		//	const previous = index === 0 ? null : modules[index - 1];
 		const { previous, next } = getPrevNext(node.module, false, index);
-		reporter.info(previous && previous.slug);
-		reporter.info(next && next.slug);
 		createPage({
 			path: node.slug,
 			component: ModuleTemplate,
@@ -363,10 +358,8 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				id: node.id,
 				slug: node.slug,
 				module: node.module,
-				previousId: previous ? previous.id : undefined,
-				previousType: previous ? previous.pageType : undefined,
-				nextId: next ? next.id : undefined,
-				nextType: next ? next.pageType : undefined,
+				previous: previous,
+				next: next,
 			},
 		});
 	});
@@ -375,8 +368,6 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 		//	const next = index === lessons.length - 1 ? null : lessons[index + 1];
 		//	const previous = index === 0 ? null : lessons[index - 1];
 		const { previous, next } = getPrevNext(node.module, node.lesson, index);
-		reporter.info(previous && previous.slug);
-		reporter.info(next && next.slug);
 		const { slug } = node;
 		createPage({
 			path: slug,
@@ -386,10 +377,8 @@ exports.createPages = async ({ graphql, actions, reporter }, themeOptions) => {
 				slug: slug,
 				module: node.module,
 				lesson: node.lesson,
-				previousId: previous ? previous.id : undefined,
-				previousType: previous ? previous.pageType : undefined,
-				nextId: next ? next.id : undefined,
-				nextType: next ? next.pageType : undefined,
+				previous: previous,
+				next: next,
 			},
 		});
 	});
